@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161b" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="GRE Words">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>GRE Words</title>
+<style>
+:root{--bg:#f6f3ee;--card:#fff;--ink:#1c1b19;--muted:#6b675f;--line:#e4dfd6;--accent:#3d4fd6;--accent-ink:#fff;--chip:#eeeae2;
+  --again:#c4352b;--hard:#a86a10;--good:#1f7a43;--easy:#3d4fd6;
+  --new:#c9c3b8;--learn:#e0a63a;--master:#2f9e5d;--heat0:#ebe7df;--heat1:#c5cdf6;--heat2:#8d9cf0;--heat3:#5a6be0;--heat4:#3343c4}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--card:#1e2128;--ink:#ecebe8;--muted:#9c9a94;--line:#2e323b;--accent:#8c9bff;--accent-ink:#14161b;--chip:#2a2e37;
+  --again:#ff8077;--hard:#e8b04f;--good:#5fd18c;--easy:#8c9bff;
+  --new:#4a4f5a;--learn:#d79a2b;--master:#3fb26f;--heat0:#262a33;--heat1:#2f3a73;--heat2:#4152a8;--heat3:#6676dd;--heat4:#98a5ff}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:600px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 16px calc(110px + env(safe-area-inset-bottom))}
+h1{font-size:24px;margin:8px 0 2px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:22px 0 8px;font-weight:600}
+.muted{color:var(--muted);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:10px 0}
+button{font:inherit;color:inherit}
+.btn{display:block;width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);cursor:pointer;text-align:center}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.btn small{display:block;font-size:13px;opacity:.75;font-weight:400}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:7px 13px;border-radius:999px;background:var(--chip);border:1px solid transparent;font-size:14px;cursor:pointer}
+.chip.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.link{background:none;border:0;color:var(--accent);padding:6px 0;cursor:pointer}
+.serif{font-family:ui-serif,"New York",Georgia,serif}
+
+/* home */
+.counts{display:flex;justify-content:space-around;text-align:center;margin:6px 0 14px}
+.counts b{display:block;font-size:34px;font-weight:700;line-height:1.1}
+.counts span{font-size:13px;color:var(--muted)}
+.c-new{color:var(--accent)}.c-learn{color:var(--again)}.c-rev{color:var(--good)}
+.banner{background:var(--chip);border-radius:12px;padding:12px 14px;font-size:14px;margin:10px 0;display:flex;gap:10px;align-items:flex-start}
+.banner button{margin-left:auto;flex:none}
+
+/* study */
+.top{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--muted);min-height:36px}
+.qcounts{font-variant-numeric:tabular-nums;font-weight:600}
+.qcounts span{margin-left:10px}.qcounts .cur{text-decoration:underline;text-underline-offset:3px}
+.flash{min-height:56vh;display:flex;flex-direction:column;cursor:pointer}
+.flash .front{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 0}
+.flash.shown .front{flex:none;padding:6px 0 4px}
+.word{font-size:40px;font-weight:600;letter-spacing:-.01em;margin:0;overflow-wrap:anywhere}
+.flash.shown .word{font-size:30px}
+.say{background:var(--chip);border:0;border-radius:999px;width:38px;height:38px;display:inline-grid;place-items:center;cursor:pointer;margin-top:10px;color:var(--muted)}
+.say svg{width:18px;height:18px}
+.pos{display:inline-block;font-size:13px;color:var(--muted);font-style:italic;margin-top:4px}
+.back{border-top:1px solid var(--line);margin-top:12px;padding-top:14px}
+.def{font-size:20px;line-height:1.4;margin:0 0 14px}
+.ex{font-style:italic;margin:0 0 14px;padding-left:12px;border-left:3px solid var(--line)}
+.ex strong{font-style:normal;font-weight:650}
+.origin{font-size:14px;color:var(--muted);margin:0}
+.hint{text-align:center;color:var(--muted);font-size:14px;margin-top:auto;padding-top:12px}
+
+.foot{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));z-index:5}
+.foot>div{max-width:600px;margin:0 auto;display:flex;gap:8px}
+.rate{flex:1;padding:10px 4px;border-radius:12px;border:1px solid var(--line);background:var(--card);cursor:pointer;text-align:center;font-weight:600}
+.rate small{display:block;font-size:12px;font-weight:400;color:var(--muted);margin-top:1px}
+.rate.again{color:var(--again)}.rate.hard{color:var(--hard)}.rate.good{color:var(--good)}.rate.easy{color:var(--easy)}
+
+/* tabs */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom));z-index:5}
+.tabs>div{max-width:600px;margin:0 auto;display:flex}
+.tabs button{flex:1;background:none;border:0;padding:6px 0;font-size:12px;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.tabs button.on{color:var(--accent);font-weight:600}
+.tabs svg{width:24px;height:24px}
+
+/* words */
+.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:16px}
+.list{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:12px}
+.item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:0;border-top:1px solid var(--line);background:none;width:100%;text-align:left;cursor:pointer}
+.item:first-child{border-top:0}
+.item .w{font-weight:600}
+.item .d{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item>div{min-width:0;flex:1}
+.item .due{font-size:12px;color:var(--muted);flex:none;text-align:right}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.dot.new{background:var(--new)}.dot.learn{background:var(--learn)}.dot.master{background:var(--master)}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;text-align:center}
+.facts div{background:var(--chip);border-radius:10px;padding:8px 4px;font-size:12px;color:var(--muted)}
+.facts b{display:block;font-size:16px;color:var(--ink)}
+
+/* progress */
+.stack{display:flex;height:14px;gap:2px;border-radius:7px;overflow:hidden;margin:10px 0 10px}
+.stack i{display:block;height:100%;min-width:0}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend b{font-variant-numeric:tabular-nums}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.tile b{display:block;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.tile span{font-size:13px;color:var(--muted)}
+.heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:3px;margin-top:6px}
+.heat i{display:block;aspect-ratio:1;border-radius:3px;background:var(--heat0)}
+.heat i.today{outline:2px solid var(--ink);outline-offset:-1px}
+.heatkey{display:flex;align-items:center;gap:3px;justify-content:flex-end;font-size:12px;color:var(--muted);margin-top:8px}
+.heatkey i{width:11px;height:11px;border-radius:2px;display:inline-block}
+.bars{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:8px}
+.bars>div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
+.bars i{display:block;width:100%;max-width:34px;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
+.bars span{font-size:12px;color:var(--muted)}
+.bars em{font-style:normal;font-size:12px;font-variant-numeric:tabular-nums}
+.tip{position:fixed;z-index:10;background:var(--ink);color:var(--bg);font-size:13px;padding:5px 9px;border-radius:8px;pointer-events:none;white-space:nowrap;transform:translate(-50%,-120%)}
+.big{font-size:44px;font-weight:700;margin:2px 0}
+input[type=date]{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+</style>
+</head>
+<body>
+<main id="app"><p class="muted">Loading…</p></main>
+<div class="foot" id="foot" hidden><div id="footInner"></div></div>
+<nav class="tabs" id="tabs" hidden><div>
+  <button data-tab="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg>Study</button>
+  <button data-tab="words" onclick="go('words')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>Words</button>
+  <button data-tab="progress" onclick="go('progress')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>Progress</button>
+</div></nav>
+<script>
+const $ = s => document.querySelector(s);
+const DAY = 864e5, MIN = 6e4;
+const LEARN_STEPS = [1, 10], RELEARN_STEPS = [10];   // minutes
+const MASTERED_IVL = 21;                             // days, Anki's "mature"
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem('gre.' + k)) ?? d } catch { return d } },
+  set(k, v) { try { localStorage.setItem('gre.' + k, JSON.stringify(v)) } catch {} }
+};
+
+let W = [], byId = {};
+let cards = store.get('cards', {});      // id -> {s: learn|review|relearn, step, due(ms), day, ivl, ease, reps, lapses}
+let log = store.get('log', {});          // "YYYY-MM-DD" -> {n new, r answers, rv review answers, ok reviews passed, t ms}
+let order = store.get('order', []);      // shuffled order new words are introduced in
+let cfg = Object.assign({ perDay: 15, test: '', backup: 0, installTip: true }, store.get('cfg', {}));
+let S = null, undo = null, tab = 'home', wordsQ = '', wordsF = 'all';
+const save = () => { store.set('cards', cards); store.set('log', log); store.set('order', order); store.set('cfg', cfg) };
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]] } return a };
+
+// Days roll over at 4am, like Anki, so a late-night session counts for that day.
+const local = ts => new Date(ts - 4 * 3600e3);
+const dayNum = (ts = Date.now()) => { const d = local(ts); return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / DAY) };
+const dayKey = n => new Date(n * DAY).toISOString().slice(0, 10);
+const dayDate = n => new Date(n * DAY + new Date(n * DAY).getTimezoneOffset() * MIN);
+const fmtDate = n => dayDate(n).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+const today = () => dayNum();
+const todayLog = () => log[dayKey(today())] || (log[dayKey(today())] = { n: 0, r: 0, rv: 0, ok: 0, t: 0 });
+
+// ---------- data ----------
+function parse(txt) {
+  const text = h => new DOMParser().parseFromString(h, 'text/html').body.textContent.trim();
+  const field = (b, k) => { const m = b.match(new RegExp(`<b>${k}:</b>([\\s\\S]*?)(?=<br><b>|$)`)); return m ? text(m[1]) : '' };
+  return txt.split(/\r?\n/).filter(l => l.trim() && !l.startsWith('#')).map(l => {
+    const i = l.indexOf('\t'), word = text(l.slice(0, i)), b = l.slice(i + 1);
+    const def = field(b, 'Definition');
+    return { id: word.toLowerCase(), word, def: def || text(b.replace(/<br>/g, ' ')), pos: field(b, 'Part of Speech'), ex: field(b, 'Example'), origin: field(b, 'Origin') };
+  }).filter(w => w.word);
+}
+
+function syncOrder() {
+  const have = new Set(order), ids = new Set(W.map(w => w.id));
+  order = order.filter(id => ids.has(id)).concat(shuffle(W.map(w => w.id).filter(id => !have.has(id))));
+}
+
+const stage = id => { const c = cards[id]; return !c ? 'new' : c.s === 'review' && c.ivl >= MASTERED_IVL ? 'master' : 'learn' };
+const stageName = { new: 'New', learn: 'Learning', master: 'Mastered' };
+
+// ---------- scheduler (SM-2, as in Anki) ----------
+function schedule(c, r, now, fuzz) {
+  const t = dayNum(now);
+  c = c ? { ...c } : { s: 'learn', step: 0, ease: 2.5, ivl: 0, reps: 0, lapses: 0 };
+  c.reps++;
+  const grad = ivl => { c.s = 'review'; c.ivl = ivl; c.day = t + ivl; delete c.due; delete c.step };
+  const fz = n => fuzz && n >= 3 ? Math.round(n * (0.95 + Math.random() * 0.1)) : n;
+  if (c.s === 'learn' || c.s === 'relearn') {
+    const steps = c.s === 'learn' ? LEARN_STEPS : RELEARN_STEPS;
+    if (r === 1) { c.step = 0; c.due = now + steps[0] * MIN }
+    else if (r === 2) c.due = now + (c.step === 0 && steps.length > 1 ? (steps[0] + steps[1]) / 2 : steps[c.step] * 1.5) * MIN;
+    else if (r === 3) {
+      if (c.step + 1 < steps.length) { c.step++; c.due = now + steps[c.step] * MIN }
+      else grad(c.s === 'learn' ? 1 : c.ivl);
+    } else grad(c.s === 'learn' ? 4 : c.ivl + 1);
+  } else {
+    const late = Math.max(0, t - c.day), ivl = c.ivl;
+    if (r === 1) {
+      c.lapses++; c.ease = Math.max(1.3, c.ease - 0.2);
+      c.ivl = Math.max(1, Math.round(ivl * 0.25));
+      c.s = 'relearn'; c.step = 0; c.due = now + RELEARN_STEPS[0] * MIN; delete c.day;
+    } else {
+      const hard = Math.max(ivl + 1, Math.round(ivl * 1.2));
+      const good = Math.max(hard + 1, Math.round((ivl + late / 2) * c.ease));
+      const easy = Math.max(good + 1, Math.round((ivl + late) * c.ease * 1.3));
+      if (r === 2) c.ease = Math.max(1.3, c.ease - 0.15);
+      if (r === 4) c.ease += 0.15;
+      grad(Math.min(365, fz([0, 0, hard, good, easy][r])));
+    }
+  }
+  return c;
+}
+
+function fmtIvl(c, now) {
+  if (c.s !== 'review') { const m = Math.round((c.due - now) / MIN); return m < 1 ? '<1m' : m < 60 ? m + 'm' : Math.round(m / 60) + 'h' }
+  const d = c.ivl; return d < 30 ? d + 'd' : d < 365 ? (d / 30).toFixed(d < 60 ? 1 : 0).replace('.0', '') + 'mo' : '1y';
+}
+
+// ---------- queue ----------
+function newLimit() { return Math.max(0, cfg.perDay + (cfg.extra?.day === today() ? cfg.extra.n : 0) - (log[dayKey(today())]?.n || 0)) }
+function queues(now = Date.now()) {
+  const t = dayNum(now), learn = [], rev = [];
+  for (const [id, c] of Object.entries(cards)) {
+    if (!byId[id]) continue;
+    if (c.s === 'review') { if (c.day <= t) rev.push(id) }
+    else learn.push(id);
+  }
+  const fresh = order.filter(id => !cards[id] && byId[id]).slice(0, newLimit());
+  return { learn, rev, fresh };
+}
+const learnDue = (q, now) => q.learn.filter(id => cards[id].due <= now).sort((a, b) => cards[a].due - cards[b].due);
+
+function pickNext() {
+  const now = Date.now(), q = queues(now), avoid = S?.last;
+  const ready = learnDue(q, now).filter(id => id !== avoid || q.learn.length + q.rev.length + q.fresh.length === 1);
+  if (ready.length) return ready[0];
+  const rev = q.rev.filter(id => id !== avoid), fresh = q.fresh;
+  if (rev.length || fresh.length) {
+    const takeNew = fresh.length && (!rev.length || Math.random() < fresh.length / (fresh.length + rev.length));
+    return takeNew ? fresh[0] : rev[Math.random() * rev.length | 0];
+  }
+  // Nothing else left today: let learning cards due in the next 20 minutes come early.
+  const soon = q.learn.filter(id => cards[id].due <= now + 20 * MIN).sort((a, b) => cards[a].due - cards[b].due);
+  return soon[0] || (q.learn.includes(avoid) && cards[avoid].due <= now + 20 * MIN ? avoid : null);
+}
+
+// ---------- screens ----------
+function foot(html) { $('#footInner').innerHTML = html || ''; $('#foot').hidden = !html; $('#tabs').hidden = !!S }
+function setTabs() { document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab)) }
+function go(t) { tab = t; S = null; foot(''); setTabs(); ({ home, words, progress })[t](); window.scrollTo(0, 0) }
+
+function streak() {
+  let n = 0, d = today();
+  if (!log[dayKey(d)]?.r) d--;
+  while (log[dayKey(d)]?.r) { n++; d-- }
+  return n;
+}
+
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+function home() {
+  const q = queues(), learnN = q.learn.filter(id => cards[id].due <= Date.now() + 20 * MIN).length;
+  const total = q.fresh.length + learnN + q.rev.length, s = streak();
+  const counts = W.reduce((a, w) => (a[stage(w.id)]++, a), { new: 0, learn: 0, master: 0 });
+  const unseen = order.filter(id => !cards[id] && byId[id]).length;
+  const testDays = cfg.test ? dayNum(new Date(cfg.test + 'T12:00').getTime()) - today() : null;
+  const laterLearn = q.learn.length - learnN;
+  $('#app').innerHTML = `
+    <h1 class="serif">GRE Words</h1>
+    <p class="muted">${s ? `🔥 ${s}-day streak · ` : ''}${counts.master} of ${W.length} mastered${testDays !== null && testDays >= 0 ? ` · test in ${testDays} day${testDays === 1 ? '' : 's'}` : ''}</p>
+    ${installTip()}
+    <div class="card">
+      <div class="counts">
+        <div><b class="c-new">${q.fresh.length}</b><span>New</span></div>
+        <div><b class="c-learn">${learnN}</b><span>Learning</span></div>
+        <div><b class="c-rev">${q.rev.length}</b><span>To review</span></div>
+      </div>
+      ${total ? `<button class="btn primary" onclick="start()">Study now<small>about ${Math.max(1, Math.round((q.fresh.length * 3 + learnN + q.rev.length) * 8 / 60))} min</small></button>`
+        : `<p style="text-align:center;margin:4px 0 12px"><b>All done for today.</b><br><span class="muted">${laterLearn ? `${laterLearn} word${laterLearn === 1 ? '' : 's'} in learning will be back shortly.` : 'Come back tomorrow for your reviews.'}</span></p>
+           ${unseen ? `<button class="btn" onclick="learnMore()">Learn 10 more new words today</button>` : ''}`}
+    </div>
+    <p class="muted" style="text-align:center">Rate each word honestly. Words you find hard come back sooner, and words you know get spaced further out.</p>`;
+}
+
+function installTip() {
+  if (!cfg.installTip || standalone()) return '';
+  return `<div class="banner"><span>📲 <b>Add this to your Home Screen.</b> ${ios ? 'Tap Share, then “Add to Home Screen”.' : 'Use your browser menu’s “Install” or “Add to Home screen”.'} Your progress is safest there.</span><button class="link" onclick="cfg.installTip=false;save();home()">✕</button></div>`;
+}
+
+function learnMore() {
+  const t = today(); cfg.extra = { day: t, n: (cfg.extra?.day === t ? cfg.extra.n : 0) + 10 }; save(); start();
+}
+
+// ---------- study ----------
+function start(mode = 'srs', list) {
+  S = { mode, shown: false, last: null, done: 0, list: list || null, i: 0, right: 0 };
+  next();
+}
+
+function next() {
+  let id;
+  if (S.mode === 'drill') id = S.list[S.i];
+  else id = pickNext();
+  if (!id) return finish();
+  S.id = id; S.shown = false; S.t0 = Date.now();
+  card();
+}
+
+const say = word => { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(word); u.lang = 'en-US'; u.rate = .9; speechSynthesis.speak(u) } catch {} };
+const speakBtn = w => `<button class="say" aria-label="Pronounce" data-w="${esc(w.word)}" onclick="event.stopPropagation();say(this.dataset.w)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>`;
+
+function highlight(w) {
+  const base = w.word.toLowerCase().replace(/[^a-z]/g, ''), stem = base.length > 5 ? base.replace(/(e|y|ate)$/, '') : base.length === 5 ? base.replace(/(e|y)$/, '') : base;
+  const ex = esc(w.ex), re = new RegExp(`\\b(${stem.slice(0, Math.max(4, stem.length))}[a-z]*)`, 'i');
+  return ex.replace(re, '<strong>$1</strong>');
+}
+
+function backHTML(w) {
+  return `<div class="back">
+    <p class="def">${esc(w.def)}</p>
+    ${w.ex ? `<p class="ex">${highlight(w)}</p>` : ''}
+    ${w.origin ? `<p class="origin">${esc(w.origin)}</p>` : ''}</div>`;
+}
+
+function qcounts() {
+  if (S.mode === 'drill') return `<span class="qcounts">${S.i + 1} / ${S.list.length}</span>`;
+  const now = Date.now(), q = queues(now), c = cards[S.id], kind = !c ? 'new' : c.s === 'review' ? 'rev' : 'learn';
+  const learnN = q.learn.filter(id => cards[id].due <= now + 20 * MIN).length;
+  return `<span class="qcounts"><span class="c-new ${kind === 'new' ? 'cur' : ''}">${q.fresh.length}</span><span class="c-learn ${kind === 'learn' ? 'cur' : ''}">${learnN}</span><span class="c-rev ${kind === 'rev' ? 'cur' : ''}">${q.rev.length}</span></span>`;
+}
+
+function card() {
+  const w = byId[S.id];
+  $('#app').innerHTML = `
+    <div class="top"><button class="link" onclick="quit()">‹ Done</button>${qcounts()}
+      ${undo && S.mode === 'srs' ? '<button class="link" onclick="doUndo()">Undo</button>' : '<span style="width:40px"></span>'}</div>
+    <div class="card flash ${S.shown ? 'shown' : ''}" onclick="${S.shown ? '' : 'reveal()'}">
+      <div class="front">
+        <div class="word serif">${esc(w.word)}</div>
+        ${S.shown && w.pos ? `<span class="pos">${esc(w.pos.toLowerCase())}</span>` : ''}
+        ${speakBtn(w)}
+      </div>
+      ${S.shown ? backHTML(w) : '<div class="hint">Think of the meaning, then tap to check</div>'}
+    </div>`;
+  if (!S.shown) return foot(`<button class="btn primary" onclick="reveal()">Show answer</button>`);
+  if (S.mode === 'drill') return foot(`<button class="rate again" onclick="drill(false)">Missed it</button><button class="rate good" onclick="drill(true)">Knew it</button>`);
+  const now = Date.now(), labels = [1, 2, 3, 4].map(r => fmtIvl(schedule(cards[S.id], r, now, false), now));
+  foot(['Again', 'Hard', 'Good', 'Easy'].map((n, i) => `<button class="rate ${n.toLowerCase()}" onclick="answer(${i + 1})">${n}<small>${labels[i]}</small></button>`).join(''));
+}
+
+function reveal() { if (!S || S.shown) return; S.shown = true; card(); window.scrollTo(0, 0) }
+
+function answer(r) {
+  const now = Date.now(), prev = cards[S.id], L = todayLog(), before = { ...L };
+  const isRev = prev?.s === 'review';
+  cards[S.id] = schedule(prev, r, now, true);
+  if (!prev) L.n++;
+  L.r++; L.t += Math.min(60e3, now - S.t0);
+  if (isRev) { L.rv++; if (r > 1) L.ok++ }
+  undo = { id: S.id, prev, day: dayKey(today()), before };
+  save();
+  S.last = S.id; S.done++;
+  next();
+}
+
+function doUndo() {
+  if (!undo) return;
+  if (undo.prev) cards[undo.id] = undo.prev; else delete cards[undo.id];
+  log[undo.day] = undo.before;
+  save();
+  S.id = undo.id; S.shown = true; S.done = Math.max(0, S.done - 1); S.t0 = Date.now(); undo = null;
+  card();
+}
+
+function drill(ok) { if (ok) S.right++; S.i++; next() }
+
+function quit() { go('home') }
+
+function finish() {
+  const drillMode = S.mode === 'drill', n = S.mode === 'drill' ? S.list.length : S.done;
+  undo = null;
+  if (!drillMode && !n) return go('home');
+  const L = log[dayKey(today())] || { r: 0, t: 0 };
+  $('#app').innerHTML = `
+    <h1 class="serif">${drillMode ? 'Drill done' : 'Nice work 🎉'}</h1>
+    <div class="card" style="text-align:center">
+      ${drillMode ? `<div class="big">${S.right} / ${n}</div><div class="muted">knew it</div>`
+        : `<div class="big">${L.r}</div><div class="muted">cards today · ${Math.max(1, Math.round(L.t / MIN))} min · 🔥 ${streak()}-day streak</div>`}
+    </div>
+    ${!drillMode && learnLeft() ? `<p class="muted" style="text-align:center">${learnLeft()} word${learnLeft() === 1 ? ' is' : 's are'} still in learning and will come back in a few minutes.</p>` : ''}`;
+  S = null; foot(''); setTabs();
+}
+const learnLeft = () => Object.values(cards).filter(c => c.s !== 'review').length;
+
+// ---------- words ----------
+function dueText(id) {
+  const c = cards[id]; if (!c) return '';
+  if (c.s !== 'review') return 'learning';
+  const d = c.day - today();
+  return d <= 0 ? 'due today' : d === 1 ? 'tomorrow' : d < 30 ? `in ${d}d` : `in ${Math.round(d / 30)}mo`;
+}
+
+function words() {
+  const counts = W.reduce((a, w) => (a[stage(w.id)]++, a), { new: 0, learn: 0, master: 0 });
+  $('#app').innerHTML = `
+    <h1 class="serif">Words</h1>
+    <input class="search" id="q" type="search" placeholder="Search ${W.length} words or meanings" value="${esc(wordsQ)}" autocomplete="off" autocapitalize="off">
+    <div class="chips" style="margin-top:10px">${['all', 'new', 'learn', 'master'].map(f =>
+      `<button class="chip ${wordsF === f ? 'on' : ''}" onclick="wordsF='${f}';words()">${f === 'all' ? `All ${W.length}` : `${stageName[f]} ${counts[f]}`}</button>`).join('')}</div>
+    <div id="list"></div>`;
+  const input = $('#q');
+  input.oninput = () => { wordsQ = input.value; renderList() };
+  renderList();
+}
+
+function renderList() {
+  const q = wordsQ.trim().toLowerCase();
+  const rows = W.filter(w => (wordsF === 'all' || stage(w.id) === wordsF) && (!q || w.id.includes(q) || w.def.toLowerCase().includes(q)))
+    .sort((a, b) => q ? (b.id.startsWith(q) - a.id.startsWith(q)) || a.id.localeCompare(b.id) : 0);
+  $('#list').innerHTML = rows.length ? `<div class="list">${rows.map(w => `
+    <button class="item" onclick="detail('${esc(w.id)}')"><span class="dot ${stage(w.id)}" title="${stageName[stage(w.id)]}"></span>
+      <div><div class="w">${esc(w.word)}</div><div class="d">${esc(w.def)}</div></div><span class="due">${dueText(w.id)}</span></button>`).join('')}</div>`
+    : '<p class="muted" style="text-align:center;margin-top:24px">No words match.</p>';
+}
+
+function detail(id) {
+  const w = byId[id], c = cards[id], st = stage(id);
+  $('#app').innerHTML = `
+    <div class="top"><button class="link" onclick="words()">‹ Words</button><span><span class="dot ${st}" style="display:inline-block;margin-right:6px"></span>${stageName[st]}</span></div>
+    <div class="card flash shown" style="min-height:0;cursor:default">
+      <div class="front"><div class="word serif">${esc(w.word)}</div>
+        ${w.pos ? `<span class="pos">${esc(w.pos.toLowerCase())}</span>` : ''}${speakBtn(w)}</div>
+      ${backHTML(w)}
+      ${c ? `<div class="facts"><div><b>${c.reps}</b>reviews</div><div><b>${c.lapses}</b>forgotten</div><div><b>${dueText(id).replace('in ', '')}</b>next</div></div>` : ''}
+    </div>
+    ${c ? `<button class="btn" onclick="forget('${esc(id)}')">Start this word over</button>` : '<p class="muted" style="text-align:center">You haven’t studied this word yet.</p>'}`;
+  window.scrollTo(0, 0);
+}
+
+function forget(id) { if (confirm(`Reset “${byId[id].word}” back to new?`)) { delete cards[id]; save(); detail(id) } }
+
+// ---------- progress ----------
+function progress() {
+  const t = today(), counts = W.reduce((a, w) => (a[stage(w.id)]++, a), { new: 0, learn: 0, master: 0 });
+  const L = log[dayKey(t)] || { r: 0, t: 0 };
+  let rv = 0, ok = 0; for (let d = t - 29; d <= t; d++) { const x = log[dayKey(d)]; if (x) { rv += x.rv; ok += x.ok } }
+  const pct = n => n / W.length * 100;
+
+  // Heatmap: 15 weeks, columns are weeks starting Sunday.
+  const weeks = 15, todayDow = dayDate(t).getDay(), startD = t - todayDow - (weeks - 1) * 7;
+  const lvl = r => !r ? 0 : r < 10 ? 1 : r < 30 ? 2 : r < 60 ? 3 : 4;
+  const cells = []; for (let d = startD; d <= t; d++) { const r = log[dayKey(d)]?.r || 0; cells.push(`<i data-tip="${fmtDate(d)}: ${r ? r + ' cards' : 'no study'}" class="${d === t ? 'today' : ''}" style="${r ? `background:var(--heat${lvl(r)})` : ''}"></i>`) }
+
+  // Forecast: reviews due on each of the next 7 days (today includes overdue).
+  const fc = Array(7).fill(0);
+  for (const c of Object.values(cards)) if (c.s === 'review') { const k = Math.max(0, c.day - t); if (k < 7) fc[k]++ } else fc[0]++;
+  const max = Math.max(1, ...fc);
+
+  const hard = Object.entries(cards).filter(([id, c]) => byId[id] && (c.lapses || c.ease < 2.5))
+    .sort(([, a], [, b]) => b.lapses - a.lapses || a.ease - b.ease).slice(0, 10);
+
+  const unseen = W.length - Object.keys(cards).filter(id => byId[id]).length;
+  const doneDay = t + Math.ceil(Math.max(0, unseen - newLimit()) / Math.max(1, cfg.perDay));
+  const testDay = cfg.test ? dayNum(new Date(cfg.test + 'T12:00').getTime()) : null;
+
+  $('#app').innerHTML = `
+    <h1 class="serif">Progress</h1>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><b>${counts.master} of ${W.length} mastered</b><span class="muted">${Math.round(pct(counts.master))}%</span></div>
+      <div class="stack" role="img" aria-label="${counts.master} mastered, ${counts.learn} learning, ${counts.new} new">
+        ${['master', 'learn', 'new'].filter(k => counts[k]).map(k => `<i data-tip="${stageName[k]}: ${counts[k]}" style="flex:${counts[k]};background:var(--${k})"></i>`).join('')}</div>
+      <div class="legend">${['master', 'learn', 'new'].map(k => `<span><span class="dot ${k}"></span>${stageName[k]} <b>${counts[k]}</b></span>`).join('')}</div>
+      <p class="muted" style="margin:10px 0 0">A word counts as mastered once you’ve remembered it at gaps of 3 weeks or more.</p>
+    </div>
+
+    <div class="tiles">
+      <div class="tile"><b>${streak()}</b><span>day streak</span></div>
+      <div class="tile"><b>${L.r}</b><span>cards today · ${Math.round(L.t / MIN)} min</span></div>
+      <div class="tile"><b>${rv >= 10 ? Math.round(ok / rv * 100) + '%' : '–'}</b><span>${rv >= 10 ? 'recall on reviews (30 days)' : 'recall, after 10 reviews'}</span></div>
+      <div class="tile"><b>${unseen ? fmtDate(doneDay) : '✓'}</b><span>${unseen ? `all words seen, at ${cfg.perDay}/day` : 'every word seen'}</span></div>
+    </div>
+
+    <h2>Study days</h2>
+    <div class="card"><div class="heat" id="heat">${cells.join('')}</div>
+      <div class="heatkey">less ${[0, 1, 2, 3, 4].map(l => `<i style="background:var(--heat${l})"></i>`).join('')} more</div></div>
+
+    <h2>Reviews coming up</h2>
+    <div class="card"><div class="bars">${fc.map((n, i) => `<div data-tip="${i ? fmtDate(t + i) : 'Today'}: ${n} due"><em>${n || ''}</em><i style="height:${n / max * 85}%"></i><span>${i ? dayDate(t + i).toLocaleDateString(undefined, { weekday: 'narrow' }) : 'Today'}</span></div>`).join('')}</div></div>
+
+    <h2>Trickiest words</h2>
+    ${hard.length ? `<div class="list" style="margin-top:0">${hard.map(([id, c]) => `
+      <button class="item" onclick="tab='words';setTabs();detail('${esc(id)}')"><span class="dot ${stage(id)}"></span>
+        <div><div class="w">${esc(byId[id].word)}</div><div class="d">${esc(byId[id].def)}</div></div><span class="due">${c.lapses ? `forgot ${c.lapses}×` : 'hard'}</span></button>`).join('')}</div>
+      <button class="btn" style="margin-top:10px" onclick="start('drill', shuffle(${esc(JSON.stringify(hard.map(([id]) => id)))}))">Drill these ${hard.length}<small>Practice only. Doesn’t change your schedule.</small></button>`
+      : '<p class="muted">Words you forget or mark Hard will show up here.</p>'}
+
+    <h2>Settings</h2>
+    <div class="card">
+      <div style="margin-bottom:8px">New words per day</div>
+      <div class="chips">${[5, 10, 15, 20, 30].map(n => `<button class="chip ${cfg.perDay === n ? 'on' : ''}" onclick="cfg.perDay=${n};save();progress()">${n}</button>`).join('')}</div>
+      <div style="margin:16px 0 8px">GRE test date</div>
+      <input type="date" id="test" value="${esc(cfg.test)}">
+      ${testDay !== null ? `<p class="muted" style="margin:8px 0 0">${unseen && doneDay > testDay - 14 ? `At ${cfg.perDay}/day you’ll finish new words on ${fmtDate(doneDay)}, less than 2 weeks before the test. Try ${Math.ceil(unseen / Math.max(1, testDay - 14 - t))} a day.` : testDay >= t ? `${testDay - t} days to go.` : ''}</p>` : ''}
+    </div>
+    <div class="card">
+      <div>Backup</div>
+      <p class="muted" style="margin:4px 0 12px">Progress is saved on this phone only. ${cfg.backup ? `Last backup ${fmtDate(dayNum(cfg.backup))}.` : 'No backup yet.'} Save one now and then (to Files, Notes or email) so you can restore it if anything happens.</p>
+      <div class="row"><button class="btn" onclick="exportData()">Save backup</button><button class="btn" onclick="$('#imp').click()">Restore</button></div>
+      <input type="file" id="imp" accept="application/json,.json" hidden onchange="importData(this.files[0])">
+      <p style="text-align:center;margin:12px 0 0"><button class="link" style="color:var(--again)" onclick="resetAll()">Reset all progress</button></p>
+    </div>`;
+  $('#test').onchange = e => { cfg.test = e.target.value; save(); progress() };
+}
+
+async function exportData() {
+  const data = JSON.stringify({ app: 'gre-words', v: 1, at: new Date().toISOString(), cards, log, order, cfg });
+  const name = `gre-words-backup-${dayKey(today())}.json`, file = new File([data], name, { type: 'application/json' });
+  try {
+    if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title: 'GRE Words backup' });
+    else { const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1e4) }
+    cfg.backup = Date.now(); save(); progress();
+  } catch (e) { if (e.name !== 'AbortError') alert('Could not save the backup: ' + e.message) }
+}
+
+async function importData(f) {
+  if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (d.app !== 'gre-words' || typeof d.cards !== 'object') throw new Error('This isn’t a GRE Words backup.');
+    if (!confirm(`Restore the backup from ${new Date(d.at).toLocaleDateString()}? This replaces your current progress.`)) return;
+    cards = d.cards; log = d.log || {}; order = d.order || []; cfg = Object.assign(cfg, d.cfg || {});
+    syncOrder(); save(); progress();
+  } catch (e) { alert(e.message) }
+  $('#imp').value = '';
+}
+
+function resetAll() {
+  if (!confirm('Erase all progress? This can’t be undone.')) return;
+  cards = {}; log = {}; order = []; syncOrder(); save(); go('home');
+}
+
+// Tap/hover tooltips for the charts.
+let tipEl;
+function showTip(e) {
+  const t = e.target.closest('[data-tip]');
+  if (!t) { tipEl?.remove(); tipEl = null; return }
+  tipEl = tipEl || document.body.appendChild(Object.assign(document.createElement('div'), { className: 'tip' }));
+  const r = t.getBoundingClientRect();
+  tipEl.textContent = t.dataset.tip;
+  tipEl.style.left = Math.min(innerWidth - 70, Math.max(70, r.left + r.width / 2)) + 'px'; tipEl.style.top = r.top + 'px';
+}
+document.addEventListener('pointerover', e => e.pointerType === 'mouse' && showTip(e));
+document.addEventListener('click', showTip);
+addEventListener('scroll', () => { tipEl?.remove(); tipEl = null }, { passive: true });
+
+document.addEventListener('keydown', e => {
+  if (!S || e.target.tagName === 'INPUT') return;
+  if (!S.shown && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); return reveal() }
+  if (S.shown && S.mode === 'srs' && '1234'.includes(e.key)) return answer(+e.key);
+  if (S.shown && S.mode === 'drill' && '12'.includes(e.key)) return drill(e.key === '2');
+  if (e.key === 'z' && undo) doUndo();
+});
+
+fetch('GRE%20Vocab%20Prep.txt', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.text() }).then(txt => {
+  W = parse(txt); byId = Object.fromEntries(W.map(w => [w.id, w]));
+  syncOrder(); save(); go('home');
+}).catch(e => { $('#app').innerHTML = `<p>Couldn’t load the word list (${esc(e.message)}). Check your connection and reload.</p>` });
+
+navigator.storage?.persist?.();
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
