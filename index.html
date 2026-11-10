@@ -520,13 +520,41 @@ async function exportData() {
   } catch (e) { if (e.name !== 'AbortError') alert('Could not save the backup: ' + e.message) }
 }
 
+// A backup file is untrusted input, and counts and settings are rendered as HTML: keep only well-typed fields.
+function cleanBackup(d) {
+  const num = (v, def = 0) => typeof v === 'number' && isFinite(v) ? v : def;
+  const obj = v => v && typeof v === 'object' && !Array.isArray(v) ? v : {};
+  const isDay = v => typeof v === 'string' && /^\d{4}-\d\d-\d\d$/.test(v);
+  const out = { cards: {}, log: {}, order: [], cfg: {} };
+  for (const [id, c] of Object.entries(obj(d.cards))) {
+    if (id === '__proto__' || !c || typeof c !== 'object') continue;
+    const s = ['learn', 'review', 'relearn'].includes(c.s) ? c.s : 'learn';
+    const k = { s, ease: Math.max(1.3, num(c.ease, 2.5)), ivl: Math.max(0, num(c.ivl)), reps: num(c.reps), lapses: num(c.lapses) };
+    if (s === 'review') k.day = num(c.day, today());
+    else { k.step = Math.max(0, Math.min(num(c.step) | 0, (s === 'learn' ? LEARN_STEPS : RELEARN_STEPS).length - 1)); k.due = num(c.due, Date.now()) }
+    out.cards[id] = k;
+  }
+  for (const [day, l] of Object.entries(obj(d.log))) {
+    if (isDay(day) && l && typeof l === 'object') out.log[day] = { n: num(l.n), r: num(l.r), rv: num(l.rv), ok: num(l.ok), t: num(l.t) };
+  }
+  if (Array.isArray(d.order)) out.order = d.order.filter(id => typeof id === 'string');
+  const c = obj(d.cfg);
+  if (num(c.perDay) >= 1) out.cfg.perDay = Math.min(500, Math.round(c.perDay));
+  if ('test' in c) out.cfg.test = isDay(c.test) ? c.test : '';
+  if ('backup' in c) out.cfg.backup = num(c.backup);
+  if (typeof c.installTip === 'boolean') out.cfg.installTip = c.installTip;
+  if (c.extra && typeof c.extra === 'object') out.cfg.extra = { day: num(c.extra.day), n: num(c.extra.n) };
+  return out;
+}
+
 async function importData(f) {
   if (!f) return;
   try {
     const d = JSON.parse(await f.text());
     if (d.app !== 'gre-words' || typeof d.cards !== 'object') throw new Error('This isn’t a GRE Words backup.');
     if (!confirm(`Restore the backup from ${new Date(d.at).toLocaleDateString()}? This replaces your current progress.`)) return;
-    cards = d.cards; log = d.log || {}; order = d.order || []; cfg = Object.assign(cfg, d.cfg || {});
+    const b = cleanBackup(d);
+    cards = b.cards; log = b.log; order = b.order; cfg = Object.assign(cfg, b.cfg);
     syncOrder(); save(); progress();
   } catch (e) { alert(e.message) }
   $('#imp').value = '';
